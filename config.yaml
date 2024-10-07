@@ -1,0 +1,122 @@
+# The naming convention for COURSE_CODE is
+# * For course hub, it should be in the format of COURSE-TERM, e.g. econ101-2023W2
+# * For exam hub, it should be in the format of exam-COURSE-TERM, e.g. exam-econ101-2023W2
+proxy:
+  secretToken: "${secret_token}" # create a random one each time
+  https:
+    enabled: true
+    type: offload
+  service:
+    annotations:
+      service.beta.kubernetes.io/aws-load-balancer-backend-protocol: "tcp"
+      service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "https"
+      service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "3600"
+hub:
+  extraEnv:
+    PROXY_PUBLIC_SERVICE_HOST: "proxy-public"
+  db:
+    type: sqlite-pvc
+    pvc:
+      storageClassName: gp2
+  baseUrl: "/jupyter"
+  extraConfig:
+    00-auth-config: |
+      # set() object needs special handling - not a string
+      c.RemoteUserAuthenticator.shibValidEntitlements = set(['staff', 'student', 'faculty'])
+  config:
+    LTI11Authenticator:
+      consumers: ${lti_consumers} # generate a random string
+      username_key: "custom_canvas_ubc_student_id"
+    JupyterHub:
+      authenticator_class: ltiauthenticator.lti11.auth.LTI11Authenticator
+
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
+    alb.ingress.kubernetes.io/backend-protocol: HTTP
+    alb.ingress.kubernetes.io/healthcheck-protocol: HTTP
+    alb.ingress.kubernetes.io/healthcheck-path: /
+    alb.ingress.kubernetes.io/success-codes: '302'
+  ingressClassName:
+  hosts:
+    # should match the domain when requesting certificate in ACM
+    - ${ingress_host}
+  pathSuffix:
+  pathType: Prefix
+  tls: []
+
+cull:
+  enabled: true
+  timeout: 300
+  every: 300
+
+singleuser:
+  memory:
+    limit: 2G
+    guarantee: 200M
+  cpu:
+    limit: 1.0
+    guarantee: 0.2
+
+  image:
+    # update image and tag to match the exam single user image
+    name: ${user_image}
+    tag: ${user_image_tag}
+  storage:
+    type: "static"
+    static:
+      pvcName: ${static_pvc_name}
+      subPath: ${static_sub_path}
+  extraEnv:
+    CHOWN_HOME: "yes"
+  uid: 0
+  fsGid: 0
+  cmd: "start-singleuser.sh"
+
+prePuller:
+  hook:
+    enabled: true
+    tolerations:
+      - key: hub.jupyter.org/dedicated
+        operator: Equal
+        value: user
+        effect: NoSchedule
+
+scheduling:
+  corePods:
+    tolerations:
+      - key: hub.jupyter.org/dedicated
+        operator: Equal
+        value: core
+        effect: NoSchedule
+      - key: hub.jupyter.org_dedicated
+        operator: Equal
+        value: core
+        effect: NoSchedule
+      - key: hub.jupyter.org/imagepulling
+        operator: Exists
+        effect: NoExecute
+      - key: node-role.kubernetes.io/master
+        operator: Equal
+        effect: NoSchedule
+
+examapi:
+  enabled: true
+  image:
+    name: lthub/jupyterhub-api
+    tag: sha-bc8937e
+    pullPolicy:
+    pullSecrets: [ ]
+  courseCode: ${course_code}
+  # generate a new one each time
+  apiKey: ${api_key}
+  # set to true if the StorageClass doesn't exist
+  createStorageClass: true
+  storageClassName: exam-api-sc
+  # EFS identifier in the format of "fs-xxxxxxxxxxxx"
+  efsHandle: ${efs_handle}
+  # the DNS name for exam api. AWS load balance controller uses it for discover SSL cert.
+  host: ${exam_api_host}
