@@ -120,7 +120,7 @@ resource "helm_release" "jupyterhub-exam" {
   version    = var.chart_version
   values     = [templatefile("config.yaml", {
     secret_token = var.proxy_secret_token
-    lti_consumers = "{${var.exam_name}:${var.lti_secret}}"
+    lti_consumers = "{\"${var.exam_name}\":\"${var.lti_secret}\"}"
     ingress_host = "${var.exam_name}-exam.${var.route53_zone_name}"
     user_image = var.exam_image
     user_image_tag = var.exam_image_tag
