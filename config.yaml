@@ -1,6 +1,7 @@
 # The naming convention for COURSE_CODE is
 # * For course hub, it should be in the format of COURSE-TERM, e.g. econ101-2023W2
 # * For exam hub, it should be in the format of exam-COURSE-TERM, e.g. exam-econ101-2023W2
+fullnameOverride: # this is needed to populate correct names for k8s resources for template "jupyterhub.fullname"
 proxy:
   secretToken: "${secret_token}" # create a random one each time
   https:
