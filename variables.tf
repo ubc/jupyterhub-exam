@@ -28,7 +28,7 @@ variable "chart_name" {
 
 variable "chart_version" {
   description = "The version of the chart"
-  default = "3.2.2-0.dev.git.6525.hb3694c56"
+  default = "3.2.2-0.dev.git.6529.hd1841a98"
 }
 
 variable "proxy_secret_token" {

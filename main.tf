@@ -124,8 +124,8 @@ resource "helm_release" "jupyterhub-exam" {
     ingress_host = "${var.exam_name}-exam.${var.route53_zone_name}"
     user_image = var.exam_image
     user_image_tag = var.exam_image_tag
-    static_pvc_name = "${var.exam_namespace}-jupyterhub-efs"
-    static_sub_path = "${var.exam_namespace}-jupyterhub-efs/{username}"
+    static_pvc_name = "efs"
+    static_sub_path = "${var.exam_name}/{username}"
     course_code = var.exam_name
     api_key = var.exam_api_key
     efs_handle = var.efs_handle
@@ -161,6 +161,10 @@ resource "aws_route53_record" "jupyterhub" {
   type    = "CNAME"
   ttl     = "300"
   records = [data.kubernetes_ingress_v1.jupyterhub.status.0.load_balancer.0.ingress.0.hostname]
+
+  depends_on = [
+    helm_release.jupyterhub-exam
+  ]
 }
 
 resource "aws_route53_record" "exam-api" {
@@ -169,4 +173,8 @@ resource "aws_route53_record" "exam-api" {
   type    = "CNAME"
   ttl     = "300"
   records = [data.kubernetes_ingress_v1.exam-api.status.0.load_balancer.0.ingress.0.hostname]
+
+  depends_on = [
+    helm_release.jupyterhub-exam
+  ]
 }
