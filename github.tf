@@ -17,6 +17,7 @@ provider "github" {
 
 
 resource "github_repository" "exam-repo" {
+  count       = var.enable_github ? 1 : 0
   name        = "jupyterhub-exam-${var.exam_name}"
   description = "A Jupyterhub exam repo"
 
@@ -35,7 +36,8 @@ resource "github_repository" "exam-repo" {
 }
 
 resource "github_actions_secret" "aws_account_id_secret" {
-  repository       = github_repository.exam-repo.name
+  count            = var.enable_github ? 1 : 0
+  repository       = github_repository.exam-repo[0].name
   secret_name      = "AWS_ACCOUNT_ID"
   plaintext_value  = var.aws_account_id
 
@@ -46,7 +48,8 @@ resource "github_actions_secret" "aws_account_id_secret" {
 }
 
 resource "github_actions_variable" "exam_name_var" {
-  repository       = github_repository.exam-repo.name
+  count            = var.enable_github ? 1 : 0
+  repository       = github_repository.exam-repo[0].name
   variable_name    = "exam_name"
   value            = var.exam_name
 

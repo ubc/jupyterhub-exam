@@ -58,6 +58,10 @@ variable "efs_handle" {
 }
 
 # Github repo variables
+variable "enable_github" {
+  default = true
+}
+
 variable "gh_repo_owner" {
   description = "Github repo owner"
   default = "ubc"
