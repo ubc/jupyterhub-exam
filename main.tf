@@ -124,7 +124,7 @@ resource "helm_release" "jupyterhub-exam" {
     ingress_host = "${var.exam_name}-exam.${var.route53_zone_name}"
     user_image = var.exam_image
     user_image_tag = var.exam_image_tag
-    static_pvc_name = "efs"
+    static_pvc_name = "exam-${var.exam_name}-jupyterhub-efs"
     static_sub_path = "${var.exam_name}/{username}"
     course_code = var.exam_name
     api_key = var.exam_api_key
@@ -136,7 +136,7 @@ resource "helm_release" "jupyterhub-exam" {
 
 data "kubernetes_ingress_v1" "jupyterhub" {
   metadata {
-    name = "jupyterhub"
+    name = "exam-${var.exam_name}-jupyterhub"
     namespace = var.exam_namespace
   }
 
@@ -147,7 +147,7 @@ data "kubernetes_ingress_v1" "jupyterhub" {
 
 data "kubernetes_ingress_v1" "exam-api" {
   metadata {
-    name = "exam-api"
+    name = "exam-${var.exam_name}-jupyterhub-exam-api"
     namespace = var.exam_namespace
   }
 
