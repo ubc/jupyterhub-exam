@@ -93,7 +93,7 @@ resource "aws_acm_certificate" "cert-api" {
   }
 }
 
-resource "aws_route53_record" "cert-apit" {
+resource "aws_route53_record" "cert-api" {
   for_each = {
     for dvo in aws_acm_certificate.cert-api.domain_validation_options : dvo.domain_name => {
       name   = dvo.resource_record_name
@@ -128,6 +128,7 @@ resource "helm_release" "jupyterhub-exam" {
     static_sub_path = "${var.exam_name}/{username}"
     course_code = var.exam_name
     api_key = var.exam_api_key
+    exam_api_storage_class = "${var.exam_name}-api-sc"
     efs_handle = var.efs_handle
     exam_api_host = "${var.exam_name}-api.${var.route53_zone_name}"
   })]
@@ -163,7 +164,7 @@ resource "aws_route53_record" "jupyterhub" {
   records = [data.kubernetes_ingress_v1.jupyterhub.status.0.load_balancer.0.ingress.0.hostname]
 
   depends_on = [
-    helm_release.jupyterhub-exam
+    data.kubernetes_ingress_v1.jupyterhub
   ]
 }
 
@@ -175,6 +176,6 @@ resource "aws_route53_record" "exam-api" {
   records = [data.kubernetes_ingress_v1.exam-api.status.0.load_balancer.0.ingress.0.hostname]
 
   depends_on = [
-    helm_release.jupyterhub-exam
+    data.kubernetes_ingress_v1.exam-api
   ]
 }

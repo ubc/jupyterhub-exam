@@ -115,7 +115,7 @@ examapi:
   apiKey: ${api_key}
   # set to true if the StorageClass doesn't exist
   createStorageClass: true
-  storageClassName: exam-api-sc
+  storageClassName: ${exam_api_storage_class}
   # EFS identifier in the format of "fs-xxxxxxxxxxxx"
   efsHandle: ${efs_handle}
   # the DNS name for exam api. AWS load balance controller uses it for discover SSL cert.
