@@ -56,27 +56,3 @@ variable "exam_api_key" {
 variable "efs_handle" {
   description = "EFS handle used for hosting exam content"
 }
-
-# Github repo variables
-variable "enable_github" {
-  default = true
-}
-
-variable "gh_repo_owner" {
-  description = "Github repo owner"
-  default = "ubc"
-}
-
-variable "gh_repo_template" {
-  description = "The template repo used to create exam repo"
-  default = "jupyterhub-exam-template"
-}
-
-variable "aws_account_id" {
-  description = "AWS account ID used for pushing container images"
-}
-
-variable "project_secret_name" {
-  description = "The name of the GitHub organization secret"
-  default = "ADD_TO_PROJECT_JUPYTERHUB"
-}

@@ -118,7 +118,7 @@ resource "helm_release" "jupyterhub-exam" {
   repository = var.helm_repo
   chart      = var.chart_name
   version    = var.chart_version
-  values     = [templatefile("config.yaml", {
+  values     = [templatefile("${path.module}/config.yaml", {
     secret_token = var.proxy_secret_token
     lti_consumers = "{\"${var.exam_name}\":\"${var.lti_secret}\"}"
     ingress_host = "${var.exam_name}-exam.${var.route53_zone_name}"
